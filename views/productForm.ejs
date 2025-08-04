@@ -1,0 +1,132 @@
+<%- include('partials/navbar') %>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4>
+                        <i class="fas fa-<%= product ? 'edit' : 'plus' %> me-2"></i>
+                        <%= product ? 'Edit Product' : 'Add New Product' %>
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form action="/products/<%= product ? 'edit/' + product._id : 'add' %>" method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Product Name *</label>
+                                    <input type="text" class="form-control" id="name" name="name" 
+                                           value="<%= product ? product.name : '' %>" required>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="category" class="form-label">Category *</label>
+                                    <select class="form-select" id="category" name="category" required>
+                                        <option value="">Select a category</option>
+                                        <% categories.forEach(category => { %>
+                                            <option value="<%= category._id %>" 
+                                                    <%= product && product.category.toString() === category._id.toString() ? 'selected' : '' %>>
+                                                <%= category.name %>
+                                            </option>
+                                        <% }) %>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="price" class="form-label">Price *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="price" name="price" 
+                                               value="<%= product ? product.price : '' %>" 
+                                               step="0.01" min="0" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="stock" class="form-label">Stock</label>
+                                    <input type="number" class="form-control" id="stock" name="stock" 
+                                           value="<%= product ? product.stock : '0' %>" min="0">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="productImage" class="form-label">Product Image</label>
+                            <input type="file" class="form-control" id="productImage" name="productImage" 
+                                   accept="image/*">
+                            <div class="form-text">Upload an image file (JPG, PNG, GIF) or use URL below</div>
+                            
+                            <% if (product && product.imageUrl) { %>
+                                <div class="mt-2">
+                                    <label class="form-label">Current Image:</label>
+                                    <div class="current-image-preview">
+                                        <img src="<%= product.imageUrl %>" alt="Current product image" 
+                                             class="img-thumbnail" style="max-height: 100px;">
+                                    </div>
+                                </div>
+                            <% } %>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="imageUrl" class="form-label">Image URL (Alternative)</label>
+                            <input type="url" class="form-control" id="imageUrl" name="imageUrl" 
+                                   value="<%= product ? product.imageUrl : '' %>" 
+                                   placeholder="https://example.com/image.jpg">
+                            <div class="form-text">Optional: Enter a URL for the product image (if not uploading a file)</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description *</label>
+                            <textarea class="form-control" id="description" name="description" rows="4" required><%= product ? product.description : '' %></textarea>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="/products/my-products" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-<%= product ? 'save' : 'plus' %> me-2"></i>
+                                <%= product ? 'Update Product' : 'Add Product' %>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    border-radius: 15px;
+}
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+.form-control:focus, .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+.input-group-text {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+.current-image-preview {
+    margin-top: 10px;
+}
+.current-image-preview img {
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+}
+</style> 

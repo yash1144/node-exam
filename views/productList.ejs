@@ -1,0 +1,631 @@
+<%- include('partials/navbar') %>
+
+<!-- Hero Section with Add Product -->
+<% if (typeof user !== 'undefined' && user) { %>
+<div class="hero-section animate__animated animate__fadeIn">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="hero-title">
+                    <i class="fas fa-rocket me-3"></i>
+                    Ready to Sell?
+                </h1>
+                <p class="hero-subtitle">
+                    Start your journey by adding your first product to the marketplace
+                </p>
+                <div class="hero-actions">
+                    <a href="/products/add" class="btn btn-primary btn-lg hero-btn">
+                        <i class="fas fa-plus me-2"></i>
+                        Add Your First Product
+                    </a>
+                    <a href="/products/my-products" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-box me-2"></i>
+                        View My Products
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="hero-icon">
+                    <i class="fas fa-store fa-5x text-primary"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<% } %>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="animate__animated animate__fadeInLeft">
+                    <i class="fas fa-list me-2"></i>
+                    <% if (typeof category !== 'undefined' && category) { %>
+                        Products in <%= category.name %>
+                    <% } else { %>
+                        All Products
+                    <% } %>
+                </h2>
+                
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <a href="/products/add" class="btn btn-primary animate__animated animate__fadeInRight">
+                        <i class="fas fa-plus me-2"></i>Add Product
+                    </a>
+                <% } %>
+            </div>
+            
+            <% if (products.length === 0) { %>
+                <div class="text-center py-5 animate__animated animate__fadeIn">
+                    <div class="empty-state">
+                        <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+                        <h4 class="text-muted">No products found</h4>
+                        <p class="text-muted">Be the first to add a product!</p>
+                        <% if (typeof user !== 'undefined' && user) { %>
+                            <a href="/products/add" class="btn btn-primary btn-lg">
+                                <i class="fas fa-plus me-2"></i>Add Product
+                            </a>
+                        <% } else { %>
+                            <a href="/auth/login" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Login to Add Products
+                            </a>
+                        <% } %>
+                    </div>
+                </div>
+            <% } else { %>
+                <div class="row" id="products-grid">
+                    <% products.forEach((product, index) => { %>
+                        <div class="col-md-6 col-lg-4 mb-4 animate__animated animate__fadeInUp" 
+                             style="animation-delay: <%= (index * 0.1) %>s;">
+                            <div class="card product-card h-100">
+                                <div class="card-image-container">
+                                    <% if (product.imageUrl) { %>
+                                        <img src="<%= product.imageUrl %>" class="card-img-top product-image" 
+                                             alt="<%= product.name %>" loading="lazy">
+                                    <% } else { %>
+                                        <div class="card-img-top product-placeholder">
+                                            <i class="fas fa-image fa-3x text-muted"></i>
+                                        </div>
+                                    <% } %>
+                                    <div class="card-overlay">
+                                        <div class="overlay-buttons">
+                                            <a href="/products/<%= product._id %>" class="btn btn-light btn-sm">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <% if (typeof user !== 'undefined' && user && (user._id.toString() === product.createdBy._id.toString() || user.role === 'admin')) { %>
+                                                <a href="/products/edit/<%= product._id %>" class="btn btn-warning btn-sm">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-danger btn-sm delete-btn" 
+                                                        data-product-id="<%= product._id %>"
+                                                        data-product-name="<%= product.name %>">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card-body">
+                                    <h5 class="card-title product-title"><%= product.name %></h5>
+                                    <p class="card-text product-description">
+                                        <%= product.description.substring(0, 100) %><%= product.description.length > 100 ? '...' : '' %>
+                                    </p>
+                                    
+                                    <div class="product-meta">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="badge category-badge"><%= product.category.name %></span>
+                                            <span class="price-tag">$<%= product.price.toFixed(2) %></span>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                <i class="fas fa-user me-1"></i>
+                                                <%= product.createdBy.username %>
+                                            </small>
+                                            <small class="text-muted">
+                                                <i class="fas fa-boxes me-1"></i>
+                                                Stock: <%= product.stock %>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card-footer">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a href="/products/<%= product._id %>" class="btn btn-outline-primary btn-sm view-btn">
+                                            <i class="fas fa-eye me-1"></i>View Details
+                                        </a>
+                                        
+                                        <% if (typeof user !== 'undefined' && user && (user._id.toString() === product.createdBy._id.toString() || user.role === 'admin')) { %>
+                                            <div class="action-buttons">
+                                                <a href="/products/edit/<%= product._id %>" class="btn btn-outline-warning btn-sm me-1">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <button class="btn btn-outline-danger btn-sm delete-btn" 
+                                                        data-product-id="<%= product._id %>"
+                                                        data-product-name="<%= product.name %>">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+}
+
+body {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+}
+
+.product-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    background: white;
+}
+
+.product-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+.card-image-container {
+    position: relative;
+    overflow: hidden;
+    height: 200px;
+}
+
+.product-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.product-card:hover .product-image {
+    transform: scale(1.1);
+}
+
+.product-placeholder {
+    height: 200px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+}
+
+.card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.product-card:hover .card-overlay {
+    opacity: 1;
+}
+
+.overlay-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.overlay-buttons .btn {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.overlay-buttons .btn:hover {
+    transform: scale(1.1);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.product-title {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.product-description {
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+}
+
+.product-meta {
+    margin-top: auto;
+}
+
+.category-badge {
+    background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+    color: white;
+    font-size: 0.8em;
+    padding: 0.4em 0.8em;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.price-tag {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--success-color);
+}
+
+.card-footer {
+    background: transparent;
+    border-top: 1px solid #e9ecef;
+    padding: 1rem 1.5rem;
+}
+
+.view-btn {
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.view-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.action-buttons .btn {
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.action-buttons .btn:hover {
+    transform: scale(1.1);
+}
+
+.delete-btn {
+    transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+    color: white;
+}
+
+.empty-state {
+    padding: 3rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.empty-state i {
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+/* Loading animation */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .product-card {
+        margin-bottom: 1rem;
+    }
+    
+    .card-image-container {
+        height: 150px;
+    }
+    
+    .product-title {
+        font-size: 1rem;
+    }
+    
+    .price-tag {
+        font-size: 1rem;
+    }
+}
+
+/* Smooth animations */
+.animate__fadeInUp {
+    animation-duration: 0.6s;
+}
+
+.animate__fadeInLeft {
+    animation-duration: 0.8s;
+}
+
+.animate__fadeInRight {
+    animation-duration: 0.8s;
+}
+
+/* Hero Section Styles */
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 60px 0;
+    margin-bottom: 40px;
+    border-radius: 0 0 30px 30px;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    opacity: 0.9;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.hero-btn {
+    background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+    border: none;
+    padding: 15px 30px;
+    font-weight: 600;
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+    transition: all 0.3s ease;
+}
+
+.hero-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(255, 107, 107, 0.6);
+}
+
+.hero-icon {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Floating Action Button */
+.fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 24px;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-actions {
+        flex-direction: column;
+    }
+    
+    .fab {
+        width: 60px;
+        height: 60px;
+        font-size: 20px;
+        bottom: 20px;
+        right: 20px;
+    }
+}
+</style>
+
+<script>
+// Delete confirmation modal
+document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const productId = this.getAttribute('data-product-id');
+        const productName = this.getAttribute('data-product-name');
+        
+        if (confirm(`Are you sure you want to delete "${productName}"?`)) {
+            window.location.href = `/products/delete/${productId}`;
+        }
+    });
+});
+
+// Add smooth scroll to top
+window.addEventListener('scroll', function() {
+    const scrollTop = document.createElement('button');
+    scrollTop.innerHTML = '<i class="fas fa-arrow-up"></i>';
+    scrollTop.className = 'scroll-top';
+    scrollTop.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 1000;
+    `;
+    
+    if (window.scrollY > 300) {
+        if (!document.querySelector('.scroll-top')) {
+            document.body.appendChild(scrollTop);
+            setTimeout(() => scrollTop.style.opacity = '1', 100);
+        }
+    } else {
+        const existingBtn = document.querySelector('.scroll-top');
+        if (existingBtn) {
+            existingBtn.style.opacity = '0';
+            setTimeout(() => existingBtn.remove(), 300);
+        }
+    }
+});
+
+// Scroll to top functionality
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.scroll-top')) {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+});
+
+// Add loading animation for links
+document.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', function() {
+        if (this.href && !this.href.includes('#')) {
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+            `;
+            loadingOverlay.innerHTML = '<div class="loading-spinner"></div>';
+            document.body.appendChild(loadingOverlay);
+        }
+    });
+});
+
+// Add hover effects for cards
+document.querySelectorAll('.product-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-10px) scale(1.02)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+    });
+});
+
+// Add search functionality (if needed)
+const searchProducts = (query) => {
+    const products = document.querySelectorAll('.product-card');
+    products.forEach(product => {
+        const title = product.querySelector('.product-title').textContent.toLowerCase();
+        const description = product.querySelector('.product-description').textContent.toLowerCase();
+        const category = product.querySelector('.category-badge').textContent.toLowerCase();
+        
+        if (title.includes(query.toLowerCase()) || 
+            description.includes(query.toLowerCase()) || 
+            category.includes(query.toLowerCase())) {
+            product.style.display = 'block';
+        } else {
+            product.style.display = 'none';
+        }
+    });
+};
+
+// Add Floating Action Button
+<% if (typeof user !== 'undefined' && user) { %>
+const fab = document.createElement('button');
+fab.className = 'fab';
+fab.innerHTML = '<i class="fas fa-plus"></i>';
+fab.title = 'Add Product';
+fab.addEventListener('click', function() {
+    window.location.href = '/products/add';
+});
+document.body.appendChild(fab);
+<% } %>
+</script>
+
+<!-- Floating Action Button -->
+<% if (typeof user !== 'undefined' && user) { %>
+<button class="fab" onclick="window.location.href='/products/add'" title="Add Product">
+    <i class="fas fa-plus"></i>
+</button>
+<% } %> 
